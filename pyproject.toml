@@ -1,0 +1,24 @@
+[project]
+name = "failurebase"
+version = "0.0.1"
+authors = [
+  { name="Marcin Wachacki", email="mawachacki@gmail.com" },
+]
+description = "Failurebase web app to keep info about your test fails."
+readme = "README.rst"
+requires-python = ">=3.7"  # TODO: to check
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+]
+
+license = {file = "LICENSE"}
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# TODO: add requirements
