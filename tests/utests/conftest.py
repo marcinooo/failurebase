@@ -5,12 +5,14 @@ from sqlalchemy.orm import Session
 
 from .data import events, tests
 
-from failurebase import app
+from failurebase.application import create_app
 from failurebase.adapters.models import Test, Event
 
 
 @pytest.fixture(scope='session')
 def client():
+
+    app = create_app()
 
     client = TestClient(app)
 

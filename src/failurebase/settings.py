@@ -2,7 +2,7 @@
 
 import os
 from pathlib import Path
-from pydantic import BaseSettings
+from pydantic import BaseSettings, validator
 
 
 CONFIGURATION_FILE_VARIABLE = 'FAILUREBASE_CONFIGURATION'
@@ -33,11 +33,20 @@ class ConfigurationError(Exception):
 class Settings(BaseSettings):
     """Main app settings."""
 
+    CLIENT_FROM_APP: bool
+    CORS_ALLOWED_ORIGINS: str | None
     DATABASE_URI: str
-
     EVENTS_PER_PAGE: int
     TESTS_PER_PAGE: int
+
+    RESOURCES_DIR: Path = Path(__file__).parent / 'resources'
 
     class Config:
         env_file = get_configuration_file_path()
         env_file_encoding = 'utf-8'
+
+    @validator('CORS_ALLOWED_ORIGINS')
+    def cors_allowed_origins(cls, v: str | None) -> list:
+        if v is not None:
+            return [host.strip() for host in v.split(',')]
+        return []

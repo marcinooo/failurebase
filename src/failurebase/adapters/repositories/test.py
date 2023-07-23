@@ -59,7 +59,7 @@ class TestRepository(AbstractRepository):
     def get_by_id(self, test_id: int) -> Test:
         """Returns single object with given id."""
 
-        test = self.session.query(Test).get(test_id)
+        test = self.session.get(Test, test_id)
         if test is None:
             raise NotFoundError(f'Test with id = "{test_id}" does not exist.')
 

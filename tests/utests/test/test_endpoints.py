@@ -1,3 +1,4 @@
+import json
 import pytest
 
 from failurebase.adapters.models import Test
@@ -35,9 +36,9 @@ class TestGetManyTests:
             (f'file=repositories/', 3),
             (f'file=non-existing-file-query', 0),
 
-            (f'test_marks={tests["test_2"]["marks"]}', 1),
-            (f'test_marks=["LOGIN_NO_MFA", "CRT"]', 1),
-            (f'test_marks=["non-existing-marks-query"]', 0),
+            ('&'.join([f'mark={m}' for m in json.loads(tests["test_2"]["marks"])]), 1),
+            (f'mark=LOGIN_NO_MFA&mark=CRT', 1),
+            (f'mark=non-existing-mark-query', 0),
         ]
     )
     def test_get_tests_with_query_parameters(self, query_parameters, expected_results, client, database_session):
@@ -48,25 +49,6 @@ class TestGetManyTests:
         content = response.json()
 
         assert len(content['items']) == expected_results
-
-    @pytest.mark.parametrize(
-        'query_parameters,expected_message',
-        [
-
-            ('test_marks=[CRT]', 'string does not match format: ["<tag>","<tag>",...]'),
-            ('test_marks={"CRT":"CRT"}', 'string does not match format: ["<tag>","<tag>",...]'),
-            ('test_marks=CRT', 'string does not match format: ["<tag>","<tag>",...]'),
-
-        ]
-    )
-    def test_get_tests_query_parameters_validation(self, query_parameters, expected_message, client, database_session):
-        response = client.get('/api/tests?' + query_parameters)
-
-        assert response.status_code == 422
-
-        content = response.json()
-
-        assert expected_message in content['detail'][0]['msg']
 
 
 class TestGetSingleTest:

@@ -7,7 +7,6 @@ from fastapi.encoders import jsonable_encoder
 from dependency_injector.wiring import inject, Provide
 
 from .validators import TestsOrder
-from ..validators import validate_test_marks
 from ...services.test import TestService
 from ...containers import Application
 from ...schemas.test import GetTestSchema
@@ -36,7 +35,9 @@ def get_tests(
         str | None, Query(title='Test UID', description='Unique identifier of test.', max_length=2000)
     ] = None,
 
-    test_marks: list[str] | None = Depends(validate_test_marks),
+    mark: Annotated[
+        list[str] | None, Query(title='Test mark', description='Mark of test.', max_length=2000)
+    ] = None,
 
     file: Annotated[
         str | None, Query(title='Test File Path', description='File path of test.', max_length=1000)
@@ -55,7 +56,7 @@ def get_tests(
 ) -> Response:
     """Returns tests per given page."""
 
-    paginated_tests = test_service.get_many(page, page_limit, uid, file, test_marks, ordering)
+    paginated_tests = test_service.get_many(page, page_limit, uid, file, mark, ordering)
 
     json_compatible_content = jsonable_encoder(paginated_tests)
     import time

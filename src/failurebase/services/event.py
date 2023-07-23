@@ -92,10 +92,11 @@ class EventService:
 
                 for id_ in ids_schema.ids:
                     try:
-                        uow.event_repository.delete_by_id(id_)
+                        event = uow.event_repository.delete_by_id(id_)
                     except NotFoundError:
                         statuses.append({'id': id_, 'status': status.HTTP_404_NOT_FOUND})
                     else:
+                        event.test.total_events_count -= 1
                         statuses.append({'id': id_, 'status': status.HTTP_200_OK})
 
                 uow.commit()

@@ -12,6 +12,7 @@ class Base(DeclarativeBase):
 class Test(Base):
 
     __tablename__ = 'tests'
+    __test__ = False
 
     id: Mapped[int] = mapped_column(primary_key=True)
 

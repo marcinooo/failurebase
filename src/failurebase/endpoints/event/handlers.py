@@ -9,7 +9,6 @@ from dependency_injector.wiring import inject, Provide
 
 from .validators import (validate_start_server_timestamp, validate_end_server_timestamp,
                          validate_start_client_timestamp, validate_end_client_timestamp, EventsOrder)
-from ..validators import validate_test_marks
 from ...services.event import EventService
 from ...containers import Application
 from ...schemas.event import CreateEventSchema, GetEventSchema
@@ -54,7 +53,9 @@ def get_events(
         str | None, Query(title='Test UID', description='Unique identifier of test.', max_length=2000)
     ] = None,
 
-    test_marks: list[str] | None = Depends(validate_test_marks),
+    test_mark: Annotated[
+        list[str] | None, Query(title='Test mark', description='Mark of test.', max_length=2000)
+    ] = None,
 
     test_file: Annotated[
         str | None, Query(title='Test File Path', description='File path of test.', max_length=1000)
@@ -75,7 +76,7 @@ def get_events(
 
     paginated_events = event_service.get_many(page, page_limit, start_server_timestamp, end_server_timestamp,
                                               start_client_timestamp, end_client_timestamp, message, traceback,
-                                              test_uid, test_marks, test_file, ordering)
+                                              test_uid, test_mark, test_file, ordering)
 
     json_compatible_content = jsonable_encoder(paginated_events)
     import time
@@ -86,7 +87,7 @@ def get_events(
 @router.post(
     '/events',
     responses={
-        200: {'model': GetEventSchema, 'description': 'Created item'},
+        201: {'model': GetEventSchema, 'description': 'Created item'},
     }
 )
 @inject

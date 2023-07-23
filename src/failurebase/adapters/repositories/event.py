@@ -96,7 +96,7 @@ class EventRepository(AbstractRepository):
     def get_by_id(self, event_id: int) -> Event:
         """Returns single object with given id."""
 
-        event = self.session.query(Event).get(event_id)
+        event = self.session.get(Event, event_id)
         if event is None:
             raise NotFoundError(f'Event with id = "{event_id}" does not exist.')
 

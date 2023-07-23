@@ -1,1 +1,4 @@
+dependency-injector
 fastapi[all]
+sqlalchemy
+pydantic~=1.10

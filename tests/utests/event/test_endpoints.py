@@ -1,3 +1,4 @@
+import json
 import pytest
 
 from ..data import tests, events
@@ -51,9 +52,9 @@ class TestGetManyEvents:
             (f'test_file=login/valid_login_AS63.robot', 1),
             (f'test_file=non-existing-test-file-query', 0),
 
-            (f'test_marks={tests["test_3"]["marks"]}', 1),
-            (f'test_marks=["LOGIN_SOCIAL_MEDIA"]', 1),
-            (f'test_marks=["non-existing-test-marks-query"]', 0),
+            ('&'.join([f'test_mark={m}' for m in json.loads(tests["test_3"]["marks"])]), 1),
+            (f'test_mark=LOGIN_SOCIAL_MEDIA', 1),
+            (f'test_mark=non-existing-test-marks-query', 0),
         ]
     )
     def test_get_events_with_query_parameters(self, query_parameters, expected_results, client, database_session):
@@ -73,9 +74,6 @@ class TestGetManyEvents:
             ('end_client_timestamp=wrong-format', 'string does not match format: %Y-%m-%dT%H:%M:%S.%f'),
             ('start_server_timestamp=wrong-format', 'string does not match format: %Y-%m-%dT%H:%M:%S.%f'),
             ('end_server_timestamp=wrong-format', 'string does not match format: %Y-%m-%dT%H:%M:%S.%f'),
-            ('test_marks=[CRT]', 'string does not match format: ["<tag>","<tag>",...]'),
-            ('test_marks={"CRT":"CRT"}', 'string does not match format: ["<tag>","<tag>",...]'),
-            ('test_marks=CRT', 'string does not match format: ["<tag>","<tag>",...]'),
 
         ]
     )
