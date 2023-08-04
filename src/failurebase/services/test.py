@@ -24,7 +24,7 @@ class TestService:
                 page_number=page_number, page_limit=page_limit, uid=uid, file=file, marks=marks, ordering=ordering
             )
 
-            event_schemas = [GetTestSchema.from_orm(event) for event in paginated_tests.chunk]
+            event_schemas = [GetTestSchema.from_orm(test) for test in paginated_tests.chunk]
             pagination_schema = PaginationSchema(
                 items=event_schemas, count=paginated_tests.count, page_number=paginated_tests.page_number,
                 page_limit=paginated_tests.page_limit, next_page=paginated_tests.next_page,

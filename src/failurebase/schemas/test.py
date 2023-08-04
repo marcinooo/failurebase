@@ -22,7 +22,7 @@ class CreateTestSchema(BaseModel):
 
 
 class GetTestSchema(BaseModel):
-    """Schema to return data of test to client."""
+    """Schema to return data of test to user."""
 
     id: int
     uid: str
@@ -38,7 +38,7 @@ class GetTestSchema(BaseModel):
 
 
 class GetTestsSchema(BaseModel):
-    """Schema to return list of tests to client."""
+    """Schema to return list of tests to user."""
 
     tests: list[GetTestSchema]
     page_number: int

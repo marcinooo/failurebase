@@ -48,7 +48,7 @@ class CreateEventSchema(BaseModel):
 
 
 class GetEventSchema(BaseModel):
-    """Schema to return data of event to client."""
+    """Schema to return data of event to user."""
 
     id: int
     test: GetTestSchema
@@ -65,7 +65,7 @@ class GetEventSchema(BaseModel):
 
 
 class GetEventsSchema(BaseModel):
-    """Schema to return list of events to client."""
+    """Schema to return list of events to user."""
 
     events: list[GetEventSchema]
     page_number: int

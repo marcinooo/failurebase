@@ -5,21 +5,7 @@ from datetime import datetime
 from enum import Enum
 from fastapi import Query
 
-from ..validators import RequestValidationError
-
-
-def validate_timestamp(parameter_name: str, timestamp: str | None = None) -> datetime | None:
-    """Validates if received query parameter has expected datetime format."""
-
-    if timestamp is not None:
-        try:
-            return datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%S.%f')
-        except ValueError:
-            raise RequestValidationError(
-                ('path', parameter_name),
-                'string does not match format: %Y-%m-%dT%H:%M:%S.%f',
-                'value_error.timestamp.format'
-            ) from None
+from ..validators import validate_timestamp
 
 
 def validate_start_server_timestamp(

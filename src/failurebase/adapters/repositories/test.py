@@ -1,7 +1,7 @@
 """Test repository module."""
 
 from .base import AbstractRepository, PaginationList
-from ..models import Test
+from ..models import Test  #, Client
 from ..exceptions import NotFoundError
 
 
@@ -73,6 +73,15 @@ class TestRepository(AbstractRepository):
             raise NotFoundError(f'Test with uid = "{uid}" does not exist.')
 
         return test
+
+    # def get_by_uid_for_client_uid(self, test_uid: int, client_uid: Client) -> Test:
+    #     """Returns single object with given uid for given client."""
+    #
+    #     test = self.session.query(Test).join(Test.client).filter(Test.uid == test_uid, Client.uid == client_uid).first()
+    #     if test is None:
+    #         raise NotFoundError(f'Test with uid = "{test_uid}" does not exist.')
+    #
+    #     return test
 
     def delete_by_id(self, test_id: int) -> None:
         """Deletes single object with given id."""

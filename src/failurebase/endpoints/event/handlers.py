@@ -12,8 +12,10 @@ from .validators import (validate_start_server_timestamp, validate_end_server_ti
 from ...services.event import EventService
 from ...containers import Application
 from ...schemas.event import CreateEventSchema, GetEventSchema
+from ...schemas.client import GetClientSchema
 from ...schemas.common import HTTPExceptionSchema, IdsSchema, StatusesSchema, PaginationSchema
 from ...adapters.exceptions import NotFoundError
+from ..auth.utils import get_current_client
 
 
 router = APIRouter()
@@ -79,8 +81,6 @@ def get_events(
                                               test_uid, test_mark, test_file, ordering)
 
     json_compatible_content = jsonable_encoder(paginated_events)
-    import time
-    time.sleep(1)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_compatible_content)
 
 
@@ -97,10 +97,12 @@ def create_event(
 
     event_service: EventService = Depends(Provide[Application.services.event_service]),
 
+    client: GetClientSchema = Depends(get_current_client),
+
 ) -> Response:
     """Creates new event and test (if it is required)."""
 
-    event = event_service.create(event_schema)
+    event = event_service.create(event_schema, client)
     json_compatible_content = jsonable_encoder(event)
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=json_compatible_content)
 

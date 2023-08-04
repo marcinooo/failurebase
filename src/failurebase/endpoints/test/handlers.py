@@ -59,8 +59,6 @@ def get_tests(
     paginated_tests = test_service.get_many(page, page_limit, uid, file, mark, ordering)
 
     json_compatible_content = jsonable_encoder(paginated_tests)
-    import time
-    time.sleep(1)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_compatible_content)
 
 

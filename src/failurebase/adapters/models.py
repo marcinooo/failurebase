@@ -9,6 +9,35 @@ class Base(DeclarativeBase):
     """Base model class."""
 
 
+class ApiKey(Base):
+
+    __tablename__ = 'apikeys'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    encrypted_value: Mapped[str] = mapped_column(String(3000))
+    created: Mapped[datetime] = mapped_column(DateTime(), default=datetime.now())
+
+    def __repr__(self):
+        return f'<ApiKey(id={self.id})>'
+
+
+class Client(Base):
+
+    __tablename__ = 'clients'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    uid: Mapped[str] = mapped_column(String(32), unique=True)
+    secret: Mapped[str] = mapped_column(String(64))
+    created: Mapped[datetime] = mapped_column(DateTime(), default=datetime.now())
+    # tests: Mapped[list['Test']] = relationship(back_populates='client', cascade='all, delete-orphan')
+    events: Mapped[list['Event']] = relationship(back_populates='client', cascade='all, delete-orphan')
+
+    def __repr__(self):
+        return f'<Client(uid={self.id})>'
+
+
 class Test(Base):
 
     __tablename__ = 'tests'
@@ -21,6 +50,8 @@ class Test(Base):
     file: Mapped[str] = mapped_column(String(1000))
     total_events_count: Mapped[int] = mapped_column(Integer())
     events: Mapped[list['Event']] = relationship(back_populates='test', cascade='all, delete-orphan')
+    # client_id: Mapped[int] = mapped_column(ForeignKey('clients.id'))
+    # client: Mapped['Client'] = relationship(back_populates='tests')
 
     def __repr__(self):
         return f'<Test(id={self.id})>'
@@ -38,6 +69,8 @@ class Event(Base):
     server_timestamp: Mapped[datetime] = mapped_column(DateTime(), default=datetime.now())
     test_id: Mapped[int] = mapped_column(ForeignKey('tests.id'))
     test: Mapped['Test'] = relationship(back_populates='events')
+    client_id: Mapped[int] = mapped_column(ForeignKey('clients.id'))
+    client: Mapped['Client'] = relationship(back_populates='events')
 
     def __repr__(self):
         return f'<Event(id={self.id})>'

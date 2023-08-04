@@ -1,7 +1,7 @@
 import json
 import pytest
 
-from ..data import tests, events
+from ..data import tests, events, clients
 
 from failurebase.adapters.models import Event, Test
 
@@ -107,10 +107,12 @@ class TestGetSingleEvent:
 
 class TestCreateEvent:
 
-    def test_create_event(self, client, database_session):
+    def test_create_event(self, client, database_session, jwt_token_factory):
 
         number_of_events_before = database_session.query(Event).count()
         number_of_tests_before = database_session.query(Test).count()
+
+        headers = {'Authorization': f'Bearer {jwt_token_factory(clients["client_1"]["uid"])}'}
 
         data = {
             'test': {
@@ -123,7 +125,7 @@ class TestCreateEvent:
             'timestamp': '2023-04-02T09:45:21.2318'
         }
 
-        response = client.post('/api/events', json=data)
+        response = client.post('/api/events', headers=headers, json=data)
 
         assert response.status_code == 201
 
@@ -171,12 +173,14 @@ class TestCreateEvent:
 
         ]
     )
-    def test_create_event_validation(self, data, errs, client, database_session):
+    def test_create_event_validation(self, data, errs, client, database_session, jwt_token_factory):
 
         number_of_events_before = database_session.query(Event).count()
         number_of_tests_before = database_session.query(Test).count()
 
-        response = client.post('/api/events', json=data)
+        headers = {'Authorization': f'Bearer {jwt_token_factory(clients["client_1"]["uid"])}'}
+
+        response = client.post('/api/events', headers=headers, json=data)
 
         assert response.status_code == 422
 
