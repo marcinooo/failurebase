@@ -6,19 +6,6 @@ from pydantic import BaseModel, validator
 from .test import CreateTestSchema, GetTestSchema
 
 
-create_event_schema_example = {
-    'test': {
-        'uid': 'Test.Test Demo',
-        'marks': ['CRT'],
-        'file': '/home/anakin/skywalker/test.robot'
-    },
-    'message': "Resolving variable '${1 / 0}' failed: ZeroDivisionError: division by zero",
-    'traceback': "Resolving variable '${1 / 0}' failed: ZeroDivisionError: division by zero",
-    'client_timestamp': '2023-06-14T12:43:51.750000',
-    'server_timestamp': '2023-06-14T12:43:52.520534'
-}
-
-
 class CreateEventSchema(BaseModel):
     """Schema to handle incoming data of event."""
 
@@ -30,7 +17,18 @@ class CreateEventSchema(BaseModel):
     class Config:
         orm_mode = True
         schema_extra = {
-            'example': create_event_schema_example
+            'examples': [
+                {
+                    'test': {
+                        'uid': 'Test.Test Demo',
+                        'marks': ['CRT'],
+                        'file': '/home/anakin/skywalker/test.robot'
+                    },
+                    'message': "Resolving variable '${1 / 0}' failed: ZeroDivisionError: division by zero",
+                    'traceback': "Resolving variable '${1 / 0}' failed: ZeroDivisionError: division by zero",
+                    'timestamp': '2023-06-14T12:43:51.750000'
+                }
+            ]
         }
 
     @validator('timestamp')
@@ -62,11 +60,18 @@ class GetEventSchema(BaseModel):
         json_encoders = {
             datetime: lambda v: v.strftime('%Y-%m-%dT%H:%M:%S.%f')
         }
-
-
-class GetEventsSchema(BaseModel):
-    """Schema to return list of events to user."""
-
-    events: list[GetEventSchema]
-    page_number: int
-    page_limit: int
+        schema_extra = {
+            'examples': [
+                {
+                    'test': {
+                        'uid': 'Test.Test Demo',
+                        'marks': ['CRT'],
+                        'file': '/home/anakin/skywalker/test.robot'
+                    },
+                    'message': "Resolving variable '${1 / 0}' failed: ZeroDivisionError: division by zero",
+                    'traceback': "Resolving variable '${1 / 0}' failed: ZeroDivisionError: division by zero",
+                    'client_timestamp': '2023-06-14T12:43:51.750000',
+                    'server_timestamp': '2023-06-14T12:43:52.520534'
+                }
+            ]
+        }

@@ -7,15 +7,16 @@ from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from dependency_injector.wiring import inject, Provide
 
-from .validators import (validate_start_server_timestamp, validate_end_server_timestamp,
-                         validate_start_client_timestamp, validate_end_client_timestamp, EventsOrder)
-from ...services.event import EventService
-from ...containers import Application
-from ...schemas.event import CreateEventSchema, GetEventSchema
-from ...schemas.client import GetClientSchema
-from ...schemas.common import HTTPExceptionSchema, IdsSchema, StatusesSchema, PaginationSchema
-from ...adapters.exceptions import NotFoundError
-from ..auth.utils import get_current_client
+from failurebase.endpoints.event.validators import (validate_start_server_timestamp, validate_end_server_timestamp,
+                                                    validate_start_client_timestamp, validate_end_client_timestamp,
+                                                    EventsOrder)
+from failurebase.services.event.service import EventService
+from failurebase.containers import Application
+from failurebase.schemas.event import CreateEventSchema, GetEventSchema
+from failurebase.schemas.client import GetClientSchema
+from failurebase.schemas.common import HTTPExceptionSchema, IdsSchema, StatusesSchema, PaginationSchema
+from failurebase.adapters.exceptions import NotFoundError
+from failurebase.endpoints.auth.utils import get_current_client, get_api_key
 
 
 router = APIRouter()
@@ -76,9 +77,11 @@ def get_events(
 ) -> Response:
     """Returns events per given page."""
 
-    paginated_events = event_service.get_many(page, page_limit, start_server_timestamp, end_server_timestamp,
-                                              start_client_timestamp, end_client_timestamp, message, traceback,
-                                              test_uid, test_mark, test_file, ordering)
+    paginated_events = event_service.get_many(
+        page, page_limit, start_server_timestamp=start_server_timestamp, end_server_timestamp=end_server_timestamp,
+        start_client_timestamp=start_client_timestamp, end_client_timestamp=end_client_timestamp, message=message,
+        traceback=traceback, test_uid=test_uid, test_marks=test_mark, test_file=test_file, ordering=ordering
+    )
 
     json_compatible_content = jsonable_encoder(paginated_events)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_compatible_content)
@@ -122,10 +125,10 @@ def get_event(
     event_service: EventService = Depends(Provide[Application.services.event_service]),
 
 ) -> Response:
-    """Item returned by requested ID."""
+    """Returns event with passed ID."""
 
     try:
-        event = event_service.get_one(event_id)
+        event = event_service.get_one_by_id(event_id)
     except NotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Event with ID "{event_id}" was not found')
     else:
@@ -146,8 +149,10 @@ def delete(
 
     event_service: EventService = Depends(Provide[Application.services.event_service]),
 
+    api_key: str = Depends(get_api_key)
+
 ) -> Response:
-    """Items deleted by passed IDs."""
+    """Delete events with passed IDs."""
 
     results = event_service.delete(ids_schema)
 

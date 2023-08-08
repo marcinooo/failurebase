@@ -3,7 +3,7 @@ import pytest
 
 from failurebase.adapters.models import Test
 
-from ..data import tests
+from ..data import tests, API_KEY
 
 
 class TestGetManyTests:

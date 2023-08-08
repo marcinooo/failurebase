@@ -1,4 +1,4 @@
-"""Event handlers module."""
+"""Client handlers module."""
 
 import uuid
 import secrets
@@ -9,14 +9,14 @@ from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from dependency_injector.wiring import inject, Provide
 
-from .validators import validate_start_created, validate_end_created, ClientsOrder
-from ...services.client import ClientService
-from ...managers.secret import SecretManager
-from ...containers import Application
-from ...schemas.client import GetClientSchema, CreateClientSchema
-from ...schemas.common import HTTPExceptionSchema, IdsSchema, StatusesSchema, PaginationSchema
-from ...adapters.exceptions import NotFoundError
-from ..auth.utils import get_api_key
+from failurebase.endpoints.client.validators import validate_start_created, validate_end_created, ClientsOrder
+from failurebase.services.client.service import ClientService
+from failurebase.managers.secret import SecretManager
+from failurebase.containers import Application
+from failurebase.schemas.client import GetClientSchema, CreateClientSchema
+from failurebase.schemas.common import HTTPExceptionSchema, IdsSchema, StatusesSchema, PaginationSchema
+from failurebase.adapters.exceptions import NotFoundError
+from failurebase.endpoints.auth.utils import get_api_key
 
 
 router = APIRouter()
@@ -57,7 +57,8 @@ def get_clients(
 ) -> Response:
     """Returns clients per given page."""
 
-    paginated_clients = client_service.get_many(page, page_limit, uid, start_created, end_created, ordering)
+    paginated_clients = client_service.get_many(page, page_limit, uid=uid, start_created=start_created,
+                                                end_created=end_created, ordering=ordering)
 
     json_compatible_content = jsonable_encoder(paginated_clients)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_compatible_content)
@@ -79,7 +80,7 @@ def create_client(
     api_key: str = Depends(get_api_key)
 
 ) -> Response:
-    """Creates new event and test (if it is required)."""
+    """Creates new client."""
 
     raw_secret = secrets.token_hex(32)
     hashed_secret = secret_manager.get_hash(raw_secret)
@@ -108,7 +109,7 @@ def get_client(
     client_service: ClientService = Depends(Provide[Application.services.client_service])
 
 ) -> Response:
-    """Item returned by requested ID."""
+    """Returns client with passed ID."""
 
     try:
         client = client_service.get_one_by_id(client_id)
@@ -137,7 +138,7 @@ def update_client(
     api_key: str = Depends(get_api_key)
 
 ) -> Response:
-    """Updates client secret."""
+    """Updates client's secret."""
 
     raw_secret = secrets.token_hex(32)
     hashed_secret = secret_manager.get_hash(raw_secret)
@@ -169,7 +170,7 @@ def delete(
     api_key: str = Depends(get_api_key)
 
 ) -> Response:
-    """Items deleted by passed IDs."""
+    """Deletes clients with passed IDs."""
 
     results = client_service.delete(ids_schema)
 

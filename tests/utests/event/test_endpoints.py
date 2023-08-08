@@ -1,7 +1,7 @@
 import json
 import pytest
 
-from ..data import tests, events, clients
+from ..data import tests, events, clients, API_KEY
 
 from failurebase.adapters.models import Event, Test
 
@@ -203,7 +203,8 @@ class TestDeleteEvents:
 
     def test_delete(self, client, database_session):
 
-        response = client.post(f'/api/events/delete', json={'ids': []})
+        headers = {'Api-Key': API_KEY}
+        response = client.post(f'/api/events/delete', headers=headers, json={'ids': []})
 
         assert response.status_code == 207
 
@@ -213,7 +214,7 @@ class TestDeleteEvents:
         events_objs = database_session.query(Event).all()
         events_ids = [event.id for event in events_objs]
 
-        response = client.post(f'/api/events/delete', json={'ids': events_ids})
+        response = client.post(f'/api/events/delete', headers=headers, json={'ids': events_ids})
 
         assert response.status_code == 207
 
@@ -233,7 +234,7 @@ class TestDeleteEvents:
 
         non_existing_id = 32131
 
-        response = client.post(f'/api/events/delete', json={'ids': [non_existing_id]})
+        response = client.post(f'/api/events/delete', headers=headers, json={'ids': [non_existing_id]})
 
         assert response.status_code == 207
 

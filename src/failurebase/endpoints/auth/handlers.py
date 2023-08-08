@@ -1,14 +1,16 @@
+"""Auth handlers module."""
+
 from datetime import timedelta
 from fastapi import APIRouter, Depends, status, Response, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from dependency_injector.wiring import inject, Provide
 
-from ...services.client import ClientService
-from ...managers.token import JwtTokenManager
-from ...managers.secret import SecretManager
-from ...containers import Application
-from ...schemas.auth import Token, CredentialsSchema
+from failurebase.services.client.service import ClientService
+from failurebase.managers.token import JwtTokenManager
+from failurebase.managers.secret import SecretManager
+from failurebase.containers import Application
+from failurebase.schemas.auth import Token, CredentialsSchema
 
 
 router = APIRouter()
@@ -34,6 +36,8 @@ def login_for_access_token(
     access_token_expire_minutes: int = Depends(Provide[Application.config.EVENTS_PER_PAGE])
 
 ) -> Response:
+    """Returns authentication token."""
+
     client = client_service.get_one_by_uid(uid=credentials.uid)
 
     if not client or not secret_manager.verify_hash(credentials.secret, client.secret.get_secret_value()):
@@ -45,9 +49,9 @@ def login_for_access_token(
 
     access_token_expires = timedelta(minutes=access_token_expire_minutes)
     access_token = jwt_manager.create_access_token(
-        data={"sub": client.uid}, expires_delta=access_token_expires
+        data={'sub': client.uid}, expires_delta=access_token_expires
     )
 
-    token = Token(access_token=access_token, token_type="bearer")
+    token = Token(access_token=access_token, token_type="bearer", expires_minutes=access_token_expire_minutes)
     json_compatible_content = jsonable_encoder(token)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_compatible_content)

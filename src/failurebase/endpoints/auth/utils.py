@@ -6,8 +6,8 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi.security.api_key import APIKeyHeader
 from dependency_injector.wiring import inject, Provide
 
-from ...services.client import ClientService
-from ...services.api_key import ApiKeyService
+from ...services.client.service import ClientService
+from ...services.api_key.service import ApiKeyService
 from ...managers.token import JwtTokenManager
 from ...managers.secret import SecretManager
 from ...containers import Application
@@ -36,7 +36,9 @@ def get_current_client(
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-    uid = jwt_manager.get_sub(token)
+    data = jwt_manager.decode_access_token(token)
+
+    uid = data.get('sub')
     if uid is None:
         raise credentials_exception
 
@@ -58,7 +60,7 @@ def get_api_key(
 
 ) -> str:
 
-    paginated_api_keys = api_key_service.get_all()
+    paginated_api_keys = api_key_service.get_many()
 
     api_keys = [secret_manager.decrypt(item.encrypted_value) for item in paginated_api_keys.items]
     if api_key not in api_keys:

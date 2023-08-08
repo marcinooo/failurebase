@@ -1,11 +1,13 @@
 """Client repository module."""
 
-from .base import AbstractRepository, PaginationList
+from typing import Type
+
+from .base import AbstractRepository
 from ..models import Client
 from ..exceptions import NotFoundError
 
 
-class ClientRepository(AbstractRepository):
+class ClientRepository(AbstractRepository[Client]):
     """Repository to manage `Client` model."""
 
     POSSIBLE_ORDER_CLAUSES = {
@@ -15,12 +17,13 @@ class ClientRepository(AbstractRepository):
         '-created': Client.created.desc()
     }
 
-    def get_many(self, page_number: int, page_limit: int, **kwargs) -> PaginationList:
-        """Returns many paginated objects."""
+    @property
+    def _model(self) -> Type[Client]:
+        return Client
 
-        query = self.session.query(Client)
+    def _filters(self, **kwargs):
         filters = []
-        order_clause = Client.created.desc()
+        related_objs = set()
 
         uid = kwargs.get('uid')
         if uid is not None:
@@ -34,33 +37,15 @@ class ClientRepository(AbstractRepository):
         if end_created is not None:
             filters.append(Client.created <= end_created)
 
+        return filters, related_objs
+
+    def _order_clause(self, **kwargs):
+        order_clause = Client.created.desc()
+        related_objs = set()
         ordering = kwargs.get('ordering')
         if ordering is not None:
             order_clause = self.POSSIBLE_ORDER_CLAUSES[ordering]
-
-        if filters:
-            query = query.filter(*filters)
-
-        offset = page_number * page_limit
-
-        query = query.order_by(order_clause)
-        count = query.count()
-
-        query = query.offset(offset).limit(page_limit)
-        chunk = query.all()
-        next_page = offset + page_limit < count
-        prev_page = page_number > 0
-
-        return PaginationList(chunk, count, page_number, page_limit, next_page, prev_page)
-
-    def get_by_id(self, client_id: int) -> Client:
-        """Returns single object with given id."""
-
-        client = self.session.get(Client, client_id)
-        if client is None:
-            raise NotFoundError(f'Client with id = "{client_id}" does not exist.')
-
-        return client
+        return order_clause, related_objs
 
     def get_by_uid(self, uid: int) -> Client:
         """Returns single object with given uid."""
@@ -68,21 +53,5 @@ class ClientRepository(AbstractRepository):
         client = self.session.query(Client).filter(Client.uid == uid).first()
         if client is None:
             raise NotFoundError(f'Client with uid = "{uid}" does not exist.')
-
-        return client
-
-    def create(self, client: Client) -> None:
-        """Creates single object in current session."""
-
-        self.session.add(client)
-
-    def delete_by_id(self, client_id: int) -> Client:
-        """Deletes single object with given id."""
-
-        client = self.session.query(Client).filter(Client.id == client_id).first()
-        if client is None:
-            raise NotFoundError(f'Client with id = "{client_id}" does not exist.')
-
-        self.session.delete(client)
 
         return client

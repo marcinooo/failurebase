@@ -16,12 +16,8 @@ class PARSER(Enum):
 
 
 def cli(args):
-    """
-    Perform given actions based on parsed arguments.
+    """Perform given actions based on parsed arguments."""
 
-    :param args: namespace built from parsed attributes
-    :type args: argparse.Namespace
-    """
     if args.parser_type == PARSER.CONFIG_CREATE:
         render_config(args.secret_key, args.dest)
     elif args.parser_type == PARSER.FRONTEND_CREATE:
@@ -33,6 +29,7 @@ def cli(args):
 
 
 def main():
+    """Main CLI function."""
 
     parser = argparse.ArgumentParser()
 

@@ -10,6 +10,7 @@ class Base(DeclarativeBase):
 
 
 class ApiKey(Base):
+    """Api key allows to perform sensitive actions like object deletions..."""
 
     __tablename__ = 'apikeys'
 
@@ -23,6 +24,7 @@ class ApiKey(Base):
 
 
 class Client(Base):
+    """Client sends events from test cases."""
 
     __tablename__ = 'clients'
 
@@ -31,7 +33,6 @@ class Client(Base):
     uid: Mapped[str] = mapped_column(String(32), unique=True)
     secret: Mapped[str] = mapped_column(String(64))
     created: Mapped[datetime] = mapped_column(DateTime(), default=datetime.now())
-    # tests: Mapped[list['Test']] = relationship(back_populates='client', cascade='all, delete-orphan')
     events: Mapped[list['Event']] = relationship(back_populates='client', cascade='all, delete-orphan')
 
     def __repr__(self):
@@ -39,6 +40,7 @@ class Client(Base):
 
 
 class Test(Base):
+    """Tests represents executed test case."""
 
     __tablename__ = 'tests'
     __test__ = False
@@ -58,6 +60,7 @@ class Test(Base):
 
 
 class Event(Base):
+    """Represents single failure."""
 
     __tablename__ = 'events'
 
