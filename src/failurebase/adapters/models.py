@@ -52,8 +52,6 @@ class Test(Base):
     file: Mapped[str] = mapped_column(String(1000))
     total_events_count: Mapped[int] = mapped_column(Integer())
     events: Mapped[list['Event']] = relationship(back_populates='test', cascade='all, delete-orphan')
-    # client_id: Mapped[int] = mapped_column(ForeignKey('clients.id'))
-    # client: Mapped['Client'] = relationship(back_populates='tests')
 
     def __repr__(self):
         return f'<Test(id={self.id})>'

@@ -2,30 +2,10 @@
 
 import sys
 import argparse
-from enum import Enum
 from pathlib import Path
 
-from .utils import render_client, create_api_key, render_config
-
-
-class PARSER(Enum):
-    CONFIG_CREATE = 11
-    FRONTEND_CREATE = 21
-    API_KEY_CREATE = 31
-    API_KEY_SHOW = 32
-
-
-def cli(args):
-    """Perform given actions based on parsed arguments."""
-
-    if args.parser_type == PARSER.CONFIG_CREATE:
-        render_config(args.secret_key, args.dest)
-    elif args.parser_type == PARSER.FRONTEND_CREATE:
-        render_client(args.url, args.dest)
-    elif args.parser_type == PARSER.API_KEY_CREATE:
-        create_api_key(args.value, args.env_file)
-    elif args.parser_type == PARSER.API_KEY_SHOW:
-        print('API_KEY_SHOW')
+from failurebase.cli.dispatcher import Cli
+from failurebase.cli.utils import PARSER
 
 
 def main():
@@ -74,17 +54,25 @@ def main():
     api_key_create_parser = api_key_subparsers.add_parser('create')
     api_key_create_parser.set_defaults(parser_type=PARSER.API_KEY_CREATE)
     api_key_create_parser.add_argument('-v', '--value', type=str, required=True,
-                                       help='Value of API KEY. Failurebase will ask about it later.')
+                                       help='Value of API KEY. Failurebase will ask about it during authentication.')
     api_key_create_parser.add_argument('-e', '--env-file', type=str, required=True,
                                        help='Path to configuration file which will be used by server.')
 
     api_key_show_parser = api_key_subparsers.add_parser('show')
     api_key_show_parser.set_defaults(parser_type=PARSER.API_KEY_SHOW)
+    api_key_show_parser.add_argument('-e', '--env-file', type=str, required=True,
+                                     help='Path to configuration file which will be used by server.')
+
+    api_key_delete_parser = api_key_subparsers.add_parser('delete')
+    api_key_delete_parser.set_defaults(parser_type=PARSER.API_KEY_DELETE)
+    api_key_delete_parser.add_argument('-i', '--api-key-id', type=str, required=True,
+                                       help='ID of API KEY.')
+    api_key_delete_parser.add_argument('-e', '--env-file', type=str, required=True,
+                                       help='Path to configuration file which will be used by server.')
 
     args = parser.parse_args()
-    cli(args)
 
-    return 0
+    return Cli().run(args).value
 
 
 if __name__ == "__main__":

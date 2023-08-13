@@ -1,7 +1,7 @@
 import json
 import pytest
 
-from ..data import tests, events, clients, API_KEY
+from ..data import clients, API_KEY
 
 from failurebase.adapters.models import Client
 

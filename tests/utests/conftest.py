@@ -30,7 +30,7 @@ def config(client):
 
 
 @pytest.fixture()
-def database_session(client, config):
+def database_session(config):
 
     database_uri = config['DATABASE_URI']
     secret_key = config['SECRET_KEY']

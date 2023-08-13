@@ -8,6 +8,7 @@ from pydantic import BaseModel
 class GetApiKeySchema(BaseModel):
     """Schema to return data of api key."""
 
+    id: int
     encrypted_value: str
     created: datetime
 
@@ -16,6 +17,7 @@ class GetApiKeySchema(BaseModel):
         schema_extra = {
             'examples': [
                 {
+                    'id': 12,
                     'encrypted_value': 'eyJhbGciOiJIUsInR...sUj5Bh8Y2NjZcnZ9zM',
                     'created': '2023-07-11T11:12:13.340000'
                 }
