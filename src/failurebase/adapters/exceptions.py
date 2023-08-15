@@ -1,3 +1,4 @@
+"""Adapters exceptions module."""
 
 
 class NotFoundError(Exception):

@@ -9,7 +9,38 @@ class Base(DeclarativeBase):
     """Base model class."""
 
 
+class ApiKey(Base):
+    """Api key allows to perform sensitive actions like object deletions..."""
+
+    __tablename__ = 'apikeys'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    encrypted_value: Mapped[str] = mapped_column(String(3000))
+    created: Mapped[datetime] = mapped_column(DateTime(), default=datetime.now())
+
+    def __repr__(self):
+        return f'<ApiKey(id={self.id})>'
+
+
+class Client(Base):
+    """Client sends events from test cases."""
+
+    __tablename__ = 'clients'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+
+    uid: Mapped[str] = mapped_column(String(32), unique=True)
+    secret: Mapped[str] = mapped_column(String(64))
+    created: Mapped[datetime] = mapped_column(DateTime(), default=datetime.now())
+    events: Mapped[list['Event']] = relationship(back_populates='client', cascade='all, delete-orphan')
+
+    def __repr__(self):
+        return f'<Client(uid={self.id})>'
+
+
 class Test(Base):
+    """Tests represents executed test case."""
 
     __tablename__ = 'tests'
     __test__ = False
@@ -27,6 +58,7 @@ class Test(Base):
 
 
 class Event(Base):
+    """Represents single failure."""
 
     __tablename__ = 'events'
 
@@ -38,6 +70,8 @@ class Event(Base):
     server_timestamp: Mapped[datetime] = mapped_column(DateTime(), default=datetime.now())
     test_id: Mapped[int] = mapped_column(ForeignKey('tests.id'))
     test: Mapped['Test'] = relationship(back_populates='events')
+    client_id: Mapped[int] = mapped_column(ForeignKey('clients.id'))
+    client: Mapped['Client'] = relationship(back_populates='events')
 
     def __repr__(self):
         return f'<Event(id={self.id})>'

@@ -1,14 +1,13 @@
 """Application module."""
 
-from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from .containers import Application
-from .settings import Settings
-from .endpoints import api
+from failurebase.containers import Application
+from failurebase.settings import Settings
+from failurebase.endpoints import api
 
 
 def create_app() -> FastAPI:
@@ -20,7 +19,7 @@ def create_app() -> FastAPI:
     db = container.adapters.db()
     db.create_database()
 
-    app = FastAPI()
+    app = FastAPI(docs_url=None)
     app.container = container
 
     allow_origins = container.config.CORS_ALLOWED_ORIGINS()

@@ -13,6 +13,15 @@ class CreateTestSchema(BaseModel):
 
     class Config:
         orm_mode = True
+        schema_extra = {
+            'examples': [
+                {
+                    'uid': 'Test.Test Example',
+                    'marks': ['CIT'],
+                    'file': '/home/obi/wan/kenobi/test.robot'
+                }
+            ]
+        }
 
     @property
     def serialized_marks(self):
@@ -22,7 +31,7 @@ class CreateTestSchema(BaseModel):
 
 
 class GetTestSchema(BaseModel):
-    """Schema to return data of test to client."""
+    """Schema to return data of test to user."""
 
     id: int
     uid: str
@@ -35,11 +44,14 @@ class GetTestSchema(BaseModel):
         json_encoders = {
             Json: lambda v: json.loads(v.marks)
         }
-
-
-class GetTestsSchema(BaseModel):
-    """Schema to return list of tests to client."""
-
-    tests: list[GetTestSchema]
-    page_number: int
-    page_limit: int
+        schema_extra = {
+            'examples': [
+                {
+                    'id': 1,
+                    'uid': 'Test.Test Example',
+                    'marks': '["CIT"]',
+                    'file': '/home/obi/wan/kenobi/test.robot',
+                    'total_events_count': 12
+                }
+            ]
+        }

@@ -1,6 +1,8 @@
 """Test repository module."""
 
-from .base import AbstractRepository, PaginationList
+from typing import Type
+
+from .base import AbstractRepository
 from ..models import Test
 from ..exceptions import NotFoundError
 
@@ -17,12 +19,13 @@ class TestRepository(AbstractRepository):
         '-total_events_count': Test.total_events_count.desc()
     }
 
-    def get_many(self, page_number: int, page_limit: int, **kwargs) -> PaginationList:
-        """Returns many paginated objects."""
+    @property
+    def _model(self) -> Type[Test]:
+        return Test
 
-        query = self.session.query(Test)
+    def _filters(self, **kwargs):
         filters = []
-        order_clause = Test.uid.desc()
+        related_objs = set()
 
         uid = kwargs.get('uid')
         if uid is not None:
@@ -37,33 +40,15 @@ class TestRepository(AbstractRepository):
             for mark in marks:
                 filters.append(Test.marks.contains(mark))
 
+        return filters, related_objs
+
+    def _order_clause(self, **kwargs):
+        order_clause = Test.uid.desc()
+        related_objs = set()
         ordering = kwargs.get('ordering')
         if ordering is not None:
             order_clause = self.POSSIBLE_ORDER_CLAUSES[ordering]
-
-        if filters:
-            query = query.filter(*filters)
-
-        offset = page_number * page_limit
-
-        query = query.order_by(order_clause)
-        count = query.count()
-
-        query = query.offset(offset).limit(page_limit)
-        chunk = query.all()
-        next_page = offset + page_limit < count
-        prev_page = page_number > 0
-
-        return PaginationList(chunk, count, page_number, page_limit, next_page, prev_page)
-
-    def get_by_id(self, test_id: int) -> Test:
-        """Returns single object with given id."""
-
-        test = self.session.get(Test, test_id)
-        if test is None:
-            raise NotFoundError(f'Test with id = "{test_id}" does not exist.')
-
-        return test
+        return order_clause, related_objs
 
     def get_by_uid(self, uid: int) -> Test:
         """Returns single object with given uid."""
@@ -71,16 +56,5 @@ class TestRepository(AbstractRepository):
         test = self.session.query(Test).filter(Test.uid == uid).first()
         if test is None:
             raise NotFoundError(f'Test with uid = "{uid}" does not exist.')
-
-        return test
-
-    def delete_by_id(self, test_id: int) -> None:
-        """Deletes single object with given id."""
-
-        test = self.session.query(Test).filter(Test.id == test_id).first()
-        if test is None:
-            raise NotFoundError(f'Test with id = "{test_id}" does not exist.')
-
-        self.session.delete(test)
 
         return test

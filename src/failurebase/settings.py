@@ -33,13 +33,16 @@ class ConfigurationError(Exception):
 class Settings(BaseSettings):
     """Main app settings."""
 
+    SECRET_KEY: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
     CLIENT_FROM_APP: bool
     CORS_ALLOWED_ORIGINS: str | None
     DATABASE_URI: str
     EVENTS_PER_PAGE: int
     TESTS_PER_PAGE: int
+    CLIENTS_PER_PAGE: int
 
-    RESOURCES_DIR: Path = Path(__file__).parent / 'resources'
+    RESOURCES_DIR: Path = Path(__file__).parent / 'resources' / 'frontend'
 
     class Config:
         env_file = get_configuration_file_path()

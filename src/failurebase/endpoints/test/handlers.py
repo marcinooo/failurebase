@@ -6,12 +6,13 @@ from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from dependency_injector.wiring import inject, Provide
 
-from .validators import TestsOrder
-from ...services.test import TestService
-from ...containers import Application
-from ...schemas.test import GetTestSchema
-from ...schemas.common import HTTPExceptionSchema, StatusesSchema, IdsSchema, PaginationSchema
-from ...adapters.exceptions import NotFoundError
+from failurebase.endpoints.test.validators import TestsOrder
+from failurebase.endpoints.auth.utils import get_api_key
+from failurebase.services.test.service import TestService
+from failurebase.containers import Application
+from failurebase.schemas.test import GetTestSchema
+from failurebase.schemas.common import HTTPExceptionSchema, StatusesSchema, IdsSchema, PaginationSchema
+from failurebase.adapters.exceptions import NotFoundError
 
 
 router = APIRouter()
@@ -56,11 +57,9 @@ def get_tests(
 ) -> Response:
     """Returns tests per given page."""
 
-    paginated_tests = test_service.get_many(page, page_limit, uid, file, mark, ordering)
+    paginated_tests = test_service.get_many(page, page_limit, uid=uid, file=file, marks=mark, ordering=ordering)
 
     json_compatible_content = jsonable_encoder(paginated_tests)
-    import time
-    time.sleep(1)
     return JSONResponse(status_code=status.HTTP_200_OK, content=json_compatible_content)
 
 
@@ -79,7 +78,7 @@ def get_test(
     test_service: TestService = Depends(Provide[Application.services.test_service]),
 
 ) -> Response:
-    """Item returned by requested ID."""
+    """Returns test with passed ID."""
 
     try:
         test = test_service.get_one_by_id(test_id)
@@ -103,8 +102,10 @@ def delete(
 
     event_service: TestService = Depends(Provide[Application.services.test_service]),
 
+    api_key: str = Depends(get_api_key)
+
 ) -> Response:
-    """Items deleted by passed IDs."""
+    """Deletes tests with passed IDs."""
 
     results = event_service.delete(ids_schema)
 
