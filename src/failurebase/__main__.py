@@ -72,7 +72,7 @@ def main():
 
     args = parser.parse_args()
 
-    return Cli().run(args).value
+    return Cli().run(args)
 
 
 if __name__ == "__main__":

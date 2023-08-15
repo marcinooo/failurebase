@@ -13,6 +13,7 @@ class ExitCode(Enum):
     API_KEY_ERROR: int = 40
     FILE_DOES_NOT_EXIST: int = 50
     COPY_FILE_ERROR: int = 60
+    FRONTEND_DIRECTORY_ERROR: int = 70
 
 
 class PARSER(Enum):

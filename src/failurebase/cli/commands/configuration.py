@@ -24,9 +24,9 @@ class CreateConfigurationFileCommand(Command):
             self.log(f'No such file or directory "{dest}"\n\n')
             return ExitCode.CONFIGURATION_FILE_ERROR
 
-        src = Path(__file__).parent / 'resources' / 'config' / '.env'
+        src = Path(__file__).parents[2] / 'resources' / 'config' / '.env'
         dest_dir = dest / 'config'
-        dest_file = dest / 'config' / '.env'
+        dest_file = dest_dir / '.env'
 
         dest_dir.mkdir(exist_ok=True)
 
@@ -41,6 +41,6 @@ class CreateConfigurationFileCommand(Command):
             config = template.render({'secret_key': secret_key})
             wfh.write(config)
 
-        self.log(f'File was successfully created.\n\n')
+        self.log(f'File was created successfully.\n\n')
 
         return ExitCode.SUCCESS
