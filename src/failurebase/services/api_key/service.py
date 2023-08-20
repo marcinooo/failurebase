@@ -1,5 +1,6 @@
 """ApiKey service module."""
 
+from logging import getLogger
 from typing import Type
 
 from failurebase.services.base.service import BaseService
@@ -8,6 +9,9 @@ from failurebase.adapters.repositories.api_key import ApiKeyRepository
 from failurebase.adapters.models import ApiKey
 from failurebase.schemas.api_key import GetApiKeySchema, CreateApiKeySchema
 from failurebase.schemas.common import PaginationSchema
+
+
+logger = getLogger(__name__)
 
 
 class ApiKeyService(BaseService[ApiKeyUnitOfWork, CreateApiKeySchema, GetApiKeySchema]):
@@ -40,5 +44,7 @@ class ApiKeyService(BaseService[ApiKeyUnitOfWork, CreateApiKeySchema, GetApiKeyS
             uow.commit()
 
             api_key_schema = GetApiKeySchema.from_orm(api_key_obj)
+
+            logger.info('%s was created', api_key_obj)
 
         return api_key_schema

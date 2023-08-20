@@ -1,5 +1,6 @@
 """Base service module."""
 
+from logging import getLogger
 from typing import Generic, Type, TypeVar
 from abc import ABCMeta, abstractmethod
 from fastapi import status
@@ -7,6 +8,9 @@ from fastapi import status
 from failurebase.adapters.repositories.base import AbstractRepository
 from failurebase.adapters.exceptions import NotFoundError
 from failurebase.schemas.common import PaginationSchema, IdsSchema, StatusesSchema
+
+
+logger = getLogger(__name__)
 
 
 UNIT_OF_WORK = TypeVar("UNIT_OF_WORK")
@@ -31,6 +35,10 @@ class BaseService(Generic[UNIT_OF_WORK, CREATE_SCHEMA, GET_SCHEMA], metaclass=AB
     def _get_schema(self) -> Type[GET_SCHEMA]:
         ...
 
+    @abstractmethod
+    def create(self, obj_schema: Type[CREATE_SCHEMA], *args, **kwargs) -> Type[GET_SCHEMA]:
+        """Creates new object if it does not exist in database."""
+
     def get_many(self, page_number: int, page_limit: int, *args, **kwargs) -> PaginationSchema:
         """Returns many object which are filtered by passed parameters."""
 
@@ -45,10 +53,6 @@ class BaseService(Generic[UNIT_OF_WORK, CREATE_SCHEMA, GET_SCHEMA], metaclass=AB
             )
 
         return pagination_schema
-
-    @abstractmethod
-    def create(self, obj_schema: Type[CREATE_SCHEMA], *args, **kwargs) -> Type[GET_SCHEMA]:
-        """Creates new object if it does not exist in database."""
 
     def get_one_by_id(self, obj_id: int) -> Type[GET_SCHEMA]:
         """Returns single object by id."""
@@ -77,5 +81,7 @@ class BaseService(Generic[UNIT_OF_WORK, CREATE_SCHEMA, GET_SCHEMA], metaclass=AB
                         statuses.append({'id': id_, 'status': status.HTTP_200_OK})
 
                 uow.commit()
+
+        logger.info('Deletion statuses: %s', str(statuses))
 
         return StatusesSchema(statuses=statuses)

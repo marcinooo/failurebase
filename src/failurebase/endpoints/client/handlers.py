@@ -2,6 +2,7 @@
 
 import uuid
 import secrets
+from logging import getLogger
 from typing import Annotated
 from datetime import datetime
 from fastapi import APIRouter, Depends, status, Response, HTTPException, Query
@@ -18,6 +19,8 @@ from failurebase.schemas.common import HTTPExceptionSchema, IdsSchema, StatusesS
 from failurebase.adapters.exceptions import NotFoundError
 from failurebase.endpoints.auth.utils import get_api_key
 
+
+logger = getLogger(__name__)
 
 router = APIRouter()
 
@@ -114,6 +117,7 @@ def get_client(
     try:
         client = client_service.get_one_by_id(client_id)
     except NotFoundError:
+        logger.error('Client with id %s was not found', client_id)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Client with ID "{client_id}" was not found')
     else:
         json_compatible_content = jsonable_encoder(client)
@@ -146,6 +150,7 @@ def update_client(
     try:
         client = client_service.update(client_id, hashed_secret)
     except NotFoundError:
+        logger.error('Client with id %s was not found', client_id)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Client with ID "{client_id}" was not found')
     else:
         client.secret = raw_secret

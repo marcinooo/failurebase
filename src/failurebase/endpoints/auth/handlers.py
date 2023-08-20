@@ -1,5 +1,6 @@
 """Auth handlers module."""
 
+from logging import getLogger
 from datetime import timedelta
 from fastapi import APIRouter, Depends, status, Response, HTTPException
 from fastapi.responses import JSONResponse
@@ -12,6 +13,8 @@ from failurebase.managers.secret import SecretManager
 from failurebase.containers import Application
 from failurebase.schemas.auth import Token, CredentialsSchema
 
+
+logger = getLogger(__name__)
 
 router = APIRouter()
 
@@ -41,6 +44,7 @@ def login_for_access_token(
     client = client_service.get_one_by_uid(uid=credentials.uid)
 
     if not client or not secret_manager.verify_hash(credentials.secret, client.secret.get_secret_value()):
+        logger.error('Client authentication failed (client: %s).', client)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect client UID or secret",

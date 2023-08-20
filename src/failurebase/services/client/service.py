@@ -1,5 +1,6 @@
 """Client service module."""
 
+from logging import getLogger
 from typing import Type
 
 from failurebase.services.base.service import BaseService
@@ -8,6 +9,9 @@ from failurebase.adapters.repositories.client import ClientRepository
 from failurebase.adapters.models import Client
 from failurebase.adapters.exceptions import NotFoundError
 from failurebase.schemas.client import GetClientSchema, CreateClientSchema
+
+
+logger = getLogger(__name__)
 
 
 class ClientService(BaseService[ClientUnitOfWork, CreateClientSchema, GetClientSchema]):
@@ -31,6 +35,7 @@ class ClientService(BaseService[ClientUnitOfWork, CreateClientSchema, GetClientS
             try:
                 client = uow.client_repository.get_by_uid(uid)
             except NotFoundError:
+                logger.error('Client with uid %s was not found', uid)
                 client_schema = None
             else:
                 client_schema = GetClientSchema.from_orm(client)
@@ -48,18 +53,22 @@ class ClientService(BaseService[ClientUnitOfWork, CreateClientSchema, GetClientS
 
             client_schema = GetClientSchema.from_orm(client_obj)
 
+            logger.info('%s was created', client_obj)
+
         return client_schema
 
     def update(self, client_id: int, hashed_secret: str) -> GetClientSchema:
         """Updates new Client."""
 
         with self.uow as uow:
-            client = uow.client_repository.get_by_id(client_id)
+            client_obj = uow.client_repository.get_by_id(client_id)
 
-            client.secret = hashed_secret
+            client_obj.secret = hashed_secret
 
             uow.commit()
 
-            client_schema = GetClientSchema.from_orm(client)
+            client_schema = GetClientSchema.from_orm(client_obj)
+
+            logger.info('%s was updated', client_obj)
 
         return client_schema

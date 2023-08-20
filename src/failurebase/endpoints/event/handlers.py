@@ -1,5 +1,6 @@
 """Event handlers module."""
 
+from logging import getLogger
 from typing import Annotated
 from datetime import datetime
 from fastapi import APIRouter, Depends, status, Response, HTTPException, Query
@@ -18,6 +19,8 @@ from failurebase.schemas.common import HTTPExceptionSchema, IdsSchema, StatusesS
 from failurebase.adapters.exceptions import NotFoundError
 from failurebase.endpoints.auth.utils import get_current_client, get_api_key
 
+
+logger = getLogger(__name__)
 
 router = APIRouter()
 
@@ -106,6 +109,7 @@ def create_event(
     """Creates new event and test (if it is required)."""
 
     event = event_service.create(event_schema, client)
+
     json_compatible_content = jsonable_encoder(event)
     return JSONResponse(status_code=status.HTTP_201_CREATED, content=json_compatible_content)
 
@@ -130,6 +134,7 @@ def get_event(
     try:
         event = event_service.get_one_by_id(event_id)
     except NotFoundError:
+        logger.error('Event with id %s was not found', event_id)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Event with ID "{event_id}" was not found')
     else:
         json_compatible_content = jsonable_encoder(event)

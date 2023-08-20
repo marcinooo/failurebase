@@ -36,7 +36,7 @@ class Client(Base):
     events: Mapped[list['Event']] = relationship(back_populates='client', cascade='all, delete-orphan')
 
     def __repr__(self):
-        return f'<Client(uid={self.id})>'
+        return f'<Client(id={self.id})>'
 
 
 class Test(Base):

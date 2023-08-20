@@ -1,5 +1,6 @@
 """Test handlers module."""
 
+from logging import getLogger
 from typing import Annotated
 from fastapi import APIRouter, Depends, status, Response, HTTPException, Query
 from fastapi.responses import JSONResponse
@@ -14,6 +15,8 @@ from failurebase.schemas.test import GetTestSchema
 from failurebase.schemas.common import HTTPExceptionSchema, StatusesSchema, IdsSchema, PaginationSchema
 from failurebase.adapters.exceptions import NotFoundError
 
+
+logger = getLogger(__name__)
 
 router = APIRouter()
 
@@ -73,7 +76,7 @@ def get_tests(
 @inject
 def get_test(
 
-    test_id: str,
+    test_id: int,
 
     test_service: TestService = Depends(Provide[Application.services.test_service]),
 
@@ -83,6 +86,7 @@ def get_test(
     try:
         test = test_service.get_one_by_id(test_id)
     except NotFoundError:
+        logger.error('Test with id %s was not found', test_id)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f'Test with id "{test_id}" was not found')
     else:
         json_compatible_content = jsonable_encoder(test)
